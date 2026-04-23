@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CareerPilot - AI Job Application Assistant</title>
+    <link rel="stylesheet" href="styles.css?v=2">
+</head>
+<body>
+    <div class="app-container">
+        <header class="header">
+            <div class="logo">
+                <span class="logo-icon">✈</span>
+                <span class="logo-text">CareerPilot</span>
+            </div>
+            <p class="tagline">Your AI-powered job application assistant</p>
+        </header>
+
+        <main class="main-content">
+            <!-- Input Section -->
+            <section class="input-section card" id="inputSection">
+                <h2>Job Application Details</h2>
+                <form id="jobForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="jobTitle">Job Title</label>
+                            <input type="text" id="jobTitle" placeholder="e.g. Senior Software Engineer" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company">Company</label>
+                            <input type="text" id="company" placeholder="e.g. Google" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="jobDescription">Job Description</label>
+                        <textarea id="jobDescription" rows="5" placeholder="Paste the full job description here..."></textarea>
+                        <div class="file-upload-wrapper">
+                            <label for="jdFile" class="file-upload-btn">
+                                <span class="file-icon">📎</span> Upload JD File
+                            </label>
+                            <input type="file" id="jdFile" accept=".txt,.pdf,.docx" class="hidden">
+                            <span id="jdFileName" class="file-name"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resumeText">Resume Text</label>
+                        <textarea id="resumeText" rows="8" placeholder="Paste your resume content here..."></textarea>
+                        <div class="file-upload-wrapper">
+                            <label for="resumeFile" class="file-upload-btn">
+                                <span class="file-icon">📎</span> Upload Resume File
+                            </label>
+                            <input type="file" id="resumeFile" accept=".txt,.pdf,.docx" class="hidden">
+                            <span id="resumeFileName" class="file-name"></span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="notes">Additional Notes <span class="optional">(optional)</span></label>
+                        <textarea id="notes" rows="2" placeholder="Any specific requirements or preferences..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" id="generateBtn">
+                        <span class="btn-text">Generate Application Materials</span>
+                        <span class="btn-loader"></span>
+                    </button>
+                </form>
+            </section>
+
+            <!-- Loading State -->
+            <section class="loading-section hidden" id="loadingSection">
+                <div class="spinner"></div>
+                <p>Generating your application materials...</p>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </section>
+
+            <!-- Results Section -->
+            <section class="results-section hidden" id="resultsSection">
+                <div class="results-header">
+                    <h2>Generated Materials</h2>
+                    <button class="btn btn-secondary" id="sendEmailBtn">
+                        <span class="btn-icon">✉</span> Send via Email
+                    </button>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab active" data-tab="resume">Tailored Resume</button>
+                    <button class="tab" data-tab="cover">Cover Letter</button>
+                    <button class="tab" data-tab="interview">Interview Prep</button>
+                    <button class="tab" data-tab="review">Review</button>
+                </div>
+
+                <div class="tab-content active" id="resumeTab">
+                    <div class="output-card">
+                        <div class="output-header">
+                            <button class="copy-btn" data-copy="resumeOutput">Copy</button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadSinglePDF('resume')">
+                                <span class="btn-icon">📄</span> Download PDF
+                            </button>
+                        </div>
+                        <pre id="resumeOutput"></pre>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="coverTab">
+                    <div class="output-card">
+                        <div class="output-header">
+                            <button class="copy-btn" data-copy="coverOutput">Copy</button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadSinglePDF('cover')">
+                                <span class="btn-icon">📄</span> Download PDF
+                            </button>
+                        </div>
+                        <pre id="coverOutput"></pre>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="interviewTab">
+                    <div class="output-card">
+                        <div class="output-header">
+                            <button class="copy-btn">Copy All</button>
+                            <button class="btn btn-outline btn-sm" onclick="downloadSinglePDF('interview')">
+                                <span class="btn-icon">📄</span> Download PDF
+                            </button>
+                        </div>
+                        <div id="interviewOutput"></div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="reviewTab">
+                    <div class="output-card">
+                        <div class="output-header">
+                            <button class="btn btn-outline btn-sm" onclick="downloadSinglePDF('review')">
+                                <span class="btn-icon">📄</span> Download PDF
+                            </button>
+                        </div>
+                        <div id="reviewOutput"></div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="footer">
+            <p>CareerPilot - Built with CrewAI & FastAPI</p>
+        </footer>
+    </div>
+
+    <!-- Email Modal -->
+    <div class="modal hidden" id="emailModal">
+        <div class="modal-content">
+            <h3>Send via Email</h3>
+            <form id="emailForm">
+                <div class="form-group">
+                    <label for="emailAddress">Email Address</label>
+                    <input type="email" id="emailAddress" placeholder="recipient@example.com" required>
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="btn btn-secondary" id="cancelEmailBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Send</button>
+                </div>
+            </form>
+            <div class="email-status hidden" id="emailStatus"></div>
+        </div>
+    </div>
+
+    <script src="app.js?v=2"></script>
+</body>
+</html>

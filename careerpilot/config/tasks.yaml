@@ -1,0 +1,95 @@
+tasks:
+  - name: analyze_job
+    description: |
+      You are given:
+      - Job title: {job_title}
+      - Company: {company}
+      - Job description: {job_description}
+
+      Analyze the job description to extract key requirements, must-have skills, preferred qualifications, and any hidden requirements.
+      Also extract ATS keywords and role-specific competencies.
+    expected_output: |
+      Return VALID JSON only with this schema:
+      {
+        "summary": "string",
+        "must_have_skills": ["string", "..."],
+        "nice_to_have_skills": ["string", "..."],
+        "responsibilities": ["string", "..."],
+        "ats_keywords": ["string", "..."],
+        "red_flags_or_risks": ["string", "..."]
+      }
+    agent: job_analysis_agent
+    output_key: job_analysis
+
+  - name: tailor_resume
+    description: |
+      You are given:
+      - Job analysis (from context)
+      - Job title: {job_title}
+      - Company: {company}
+      - Resume: {resume_text}
+      - Notes from candidate: {notes}
+
+      Tailor the resume to match the job requirements while staying truthful.
+      Emphasize relevant experience, skills, and achievements. Add quantifiable impact where it can be inferred from existing content; do not invent facts.
+    expected_output: |
+      Return a complete resume in clean plain text (no markdown), with clear section headers.
+    agent: resume_tailoring_agent
+    output_key: tailored_resume
+    depends_on: [analyze_job]
+
+  - name: write_cover_letter
+    description: |
+      You are given:
+      - Job analysis (from context)
+      - Tailored resume (from context)
+      - Job title: {job_title}
+      - Company: {company}
+      - Candidate notes: {notes}
+
+      Write a compelling cover letter tailored to the role and company.
+      Make it specific to the job analysis and the candidate's experience; do not use generic filler.
+    expected_output: |
+      Return a professional cover letter in plain text (no markdown).
+    agent: cover_letter_agent
+    output_key: cover_letter
+    depends_on: [analyze_job, tailor_resume]
+
+  - name: prepare_interview
+    description: |
+      You are given:
+      - Job analysis (from context)
+      - Job title: {job_title}
+      - Company: {company}
+
+      Generate interview preparation guidance specific to this role.
+      Include role-specific technical/behavioral questions and what a strong answer should cover.
+    expected_output: |
+      Return VALID JSON only with this schema:
+      {
+        "prep_tips": ["string", "..."],
+        "behavioral_questions": [{"question":"string","what_good_answers_cover":["string","..."]}],
+        "technical_questions": [{"question":"string","what_good_answers_cover":["string","..."]}],
+        "questions_to_ask_interviewer": ["string", "..."]
+      }
+    agent: interview_coach_agent
+    output_key: interview_prep
+    depends_on: [analyze_job]
+
+  - name: review_outputs
+    description: |
+      Review the generated outputs from context (job analysis, tailored resume, cover letter, interview prep).
+      Check for: consistency, accuracy, relevance to the job, missing keywords, tone, and any risky claims.
+      Provide concrete improvement suggestions.
+    expected_output: |
+      Return VALID JSON only with this schema:
+      {
+        "overall_assessment": "string",
+        "resume_feedback": ["string", "..."],
+        "cover_letter_feedback": ["string", "..."],
+        "interview_prep_feedback": ["string", "..."],
+        "top_priority_fixes": ["string", "..."]
+      }
+    agent: review_agent
+    output_key: review_feedback
+    depends_on: [tailor_resume, write_cover_letter, prepare_interview]

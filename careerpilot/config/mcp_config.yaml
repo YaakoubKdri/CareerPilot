@@ -1,0 +1,112 @@
+server:
+  name: careerpilot_mcp
+  version: 1.0.0
+
+mcp_tools:
+  - name: extract_job_requirements
+    description: Extract key requirements, skills, and qualifications from job description text
+    input_schema:
+      type: object
+      properties:
+        job_description:
+          type: string
+          description: The full job description text
+      required: [job_description]
+    output_schema:
+      type: object
+      properties:
+        required_skills:
+          type: array
+          items: {type: string}
+        preferred_qualifications:
+          type: array
+          items: {type: string}
+        key_responsibilities:
+          type: array
+          items: {type: string}
+        keywords:
+          type: array
+          items: {type: string}
+
+  - name: score_resume_against_job
+    description: Score how well a resume matches job requirements
+    input_schema:
+      type: object
+      properties:
+        resume_text:
+          type: string
+          description: The resume content
+        job_requirements:
+          type: object
+          description: Extracted job requirements
+      required: [resume_text, job_requirements]
+    output_schema:
+      type: object
+      properties:
+        match_score:
+          type: number
+          description: Score from 0-100
+        matched_skills:
+          type: array
+          items: {type: string}
+        missing_skills:
+          type: array
+          items: {type: string}
+        suggestions:
+          type: array
+          items: {type: string}
+
+  - name: find_keyword_gaps
+    description: Find important keywords from job description missing in resume
+    input_schema:
+      type: object
+      properties:
+        resume_text:
+          type: string
+          description: The resume content
+        job_description:
+          type: string
+          description: The job description text
+      required: [resume_text, job_description]
+    output_schema:
+      type: object
+      properties:
+        missing_keywords:
+          type: array
+          items: {type: string}
+        suggestions:
+          type: array
+          items: {type: string}
+
+  - name: generate_cover_letter_outline
+    description: Generate a structured outline for a cover letter
+    input_schema:
+      type: object
+      properties:
+        candidate_name:
+          type: string
+          description: Candidate's name
+        job_title:
+          type: string
+          description: Target job title
+        company_name:
+          type: string
+          description: Target company
+        key_points:
+          type: array
+          items: {type: string}
+          description: Key points to include
+      required: [candidate_name, job_title, company_name]
+    output_schema:
+      type: object
+      properties:
+        outline:
+          type: object
+          properties:
+            opening:
+              type: string
+            body_points:
+              type: array
+              items: {type: string}
+            closing:
+              type: string}
